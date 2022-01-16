@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="overflow-hidden">
     <v-main>
       <router-view/>
     </v-main>
@@ -17,3 +17,9 @@ export default Vue.extend({
   }),
 });
 </script>
+
+<style>
+html {
+  overflow-y: auto !important
+}
+</style>

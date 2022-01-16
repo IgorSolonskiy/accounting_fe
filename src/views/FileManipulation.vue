@@ -1,16 +1,16 @@
 <template>
-  <side-nav />
+  <main-layout/>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import SideNav from '../components/navigations/SideNav.vue'
+import MainLayout from '../components/layouts/MainLayout.vue'
 
 export default Vue.extend({
   name: 'FileManipulation',
 
   components: {
-    SideNav,
+    MainLayout,
   },
 })
 </script>
