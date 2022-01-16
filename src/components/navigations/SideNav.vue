@@ -22,7 +22,7 @@
         <v-list-item
             v-for="item in items"
             :key="item.title"
-            @click="movePage(item.link)"
+            :to="item.link"
             link
         >
           <v-list-item-icon class="ma-6 ml-0">
@@ -48,11 +48,6 @@ export default {
         {title: 'File manipulation', icon: 'mdi-help-box', link: 'manipulation'},
       ],
       right: null,
-    }
-  },
-  methods: {
-    movePage(page) {
-      this.$router.push(page)
     }
   }
 }
