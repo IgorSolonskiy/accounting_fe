@@ -3,8 +3,8 @@
     <side-nav/>
     <div class="content-wrapper">
       <div class="import-wrapper">
-        <h2>Import file</h2>
-        <file-input/>
+        <h2>Import excel file</h2>
+        <import-excel-form/>
       </div>
       <div>
 
@@ -15,12 +15,12 @@
 
 <script>
 import SideNav from "@/components/navigations/SideNav";
-import FileInput from "@/components/inputs/FileInput";
+import ImportExcelForm from "@/components/forms/ImportExcelForm";
 
 export default {
   components: {
     SideNav,
-    FileInput
+    ImportExcelForm
   }
 }
 </script>
