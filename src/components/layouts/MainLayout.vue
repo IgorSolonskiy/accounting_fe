@@ -2,27 +2,46 @@
   <div class="container">
     <side-nav/>
     <div class="content-wrapper">
-      <div class="import-wrapper">
-        <h2>Import excel file</h2>
-        <import-excel-form/>
-      </div>
-      <div>
+      <import-excel-form @addFile="addFile"/>
 
+      <div class="exchange-wrapper">
+        <font-awesome-icon icon="exchange-alt"/>
+      </div>
+      <export-excel-file v-if="currentFile"/>
+      <div v-else class="no-item-wrapper">
+        <v-card
+            elevation="2"
+        >
+          <v-card-text>
+            Please upload the file.
+          </v-card-text>
+        </v-card>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import SideNav from "@/components/navigations/SideNav";
-import ImportExcelForm from "@/components/forms/ImportExcelForm";
+import SideNav from '@/components/navigations/SideNav';
+import ImportExcelForm from '@/components/forms/ImportExcelForm';
+import ExportExcelFile from '@/components/forms/ExportExcelFile';
 
 export default {
+  data:()=>({
+    currentFile: 1
+  }),
   components: {
     SideNav,
-    ImportExcelForm
+    ImportExcelForm,
+    ExportExcelFile,
+  },
+  methods: {
+    addFile(file){
+      this.currentFile = file;
+      window.open(file)
+    },
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -33,17 +52,44 @@ export default {
 
 }
 
+.no-item-wrapper {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.v-card {
+  width: 200px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__text {
+    font-size: 20px;
+    text-align: center;
+  }
+}
+
 .content-wrapper {
   display: flex;
   width: 100%;
+  margin: 20px;
 }
 
-.import-wrapper {
-  width: 50%;
-  margin: 20px;
+.exchange-wrapper {
+  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  margin: 0 40px;
+
+  & > svg {
+    width: 30%;
+    height: 30%;
+  }
 }
+
 </style>
