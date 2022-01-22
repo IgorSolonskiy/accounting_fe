@@ -7,7 +7,7 @@
         lazy-validation
     >
       <v-file-input
-          label="Excel"
+          label="Please select an excel file."
           type="file"
           v-model="file"
           :rules="fileRules"
@@ -15,17 +15,22 @@
           outlined
           dense
       />
+      <div>
+        <v-select @change="changeDate" :items="dates" label="Please select a book formation date."/>
+      </div>
     </v-form>
   </div>
 </template>
 
 <script>
 import * as Excel from 'exceljs';
+import moment from 'moment';
 
 export default {
   data: () => ({
     valid: true,
     file: null,
+    dates: [],
     fileRules: [
       file => {
         const validFormat = file?.name.match(/.*\.(xlsx|xls|csv)/i);
@@ -44,15 +49,45 @@ export default {
 
       const workbook = new Excel.Workbook();
       await workbook.xlsx.load(file);
-      const worksheet = workbook.getWorksheet(1);
-      const rows = worksheet.getRows(11, 20).filter(row => row.getCell(1).value);
+      const worksheet = workbook.getWorksheet('Расход');
+      const numberRows = worksheet.lastRow.number;
+      const firstRow = 1;
+
+      const rows = worksheet.getRows(firstRow, numberRows)
+          .filter(row => !row.getCell(1).value && !row.getCell(2).value && row.getCell(3).value);
+
       rows.forEach(row => {
         row.eachCell(cell => {
-          // console.log(cell.value);
+          if (!cell.address.startsWith('C')) return null;
+
+          const tableCreated = moment(cell.value).subtract(10, 'days').calendar();
+
+          this.dates.push(tableCreated);
         });
       });
 
       this.$emit('addFile', file);
+    },
+    async changeDate(date) {
+      console.log(this.file)
+      const workbook = new Excel.Workbook();
+      await workbook.xlsx.load(this.file);
+      const worksheet = workbook.getWorksheet('Расход');
+      const numberRows = worksheet.lastRow.number;
+      const firstRow = 1;
+
+      const rows = worksheet.getRows(firstRow, numberRows)
+          .filter(row => !row.getCell(1).value && !row.getCell(2).value && row.getCell(3).value);
+
+      rows.forEach(row => {
+        row.eachCell(cell => {
+          const tableCreated = moment(cell.value).subtract(10, 'days').calendar();
+
+          if (!cell.address.startsWith('C') || tableCreated !== date) return null;
+
+          console.log(cell)
+        });
+      });
     },
   },
 };
