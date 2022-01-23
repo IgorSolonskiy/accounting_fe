@@ -9,11 +9,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import MainLayout from '@/components/layouts/MainLayout'
-import ImportExcelForm from '@/components/forms/ImportExcelForm';
-import ExportExcelFile from '@/components/forms/ExportExcelFile';
-import ExchangeIcon from '@/components/icons/ExchangeIcon';
-import NoItemPlaceholder from "@/components/cards/NoItemPlaceholder";
+import MainLayout from '@/components/layouts/MainLayout.vue'
+import ImportExcelForm from '@/components/forms/ImportExcelForm.vue';
+import ExportExcelFile from '@/components/forms/ExportExcelFile.vue';
+import ExchangeIcon from '@/components/icons/ExchangeIcon.vue';
+import NoItemPlaceholder from "@/components/cards/NoItemPlaceholder.vue";
 
 export default Vue.extend({
   name: 'FileManipulation',

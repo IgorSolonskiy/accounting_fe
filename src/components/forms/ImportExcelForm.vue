@@ -17,6 +17,7 @@
       />
       <div>
         <v-select @change="changeDate" :items="dates" label="Please select a book formation date."/>
+
       </div>
     </v-form>
   </div>
@@ -25,11 +26,13 @@
 <script>
 import * as Excel from 'exceljs';
 import moment from 'moment';
+import axios from 'axios';
 
 export default {
   data: () => ({
     valid: true,
     file: null,
+    exportFile: null,
     dates: [],
     fileRules: [
       file => {
@@ -41,6 +44,12 @@ export default {
       },
     ],
   }),
+  async created() {
+    const url = '/ExampleBook.xlsx';
+    const {data} = await axios.get(url, {responseType: 'arraybuffer'});
+
+    this.exportFile = data;
+  },
   methods: {
     async changeFile(file) {
       const isValidFormat = this.$refs.form.validate();
@@ -69,7 +78,6 @@ export default {
       this.$emit('addFile', file);
     },
     async changeDate(date) {
-      console.log(this.file)
       const workbook = new Excel.Workbook();
       await workbook.xlsx.load(this.file);
       const worksheet = workbook.getWorksheet('Расход');
@@ -79,15 +87,70 @@ export default {
       const rows = worksheet.getRows(firstRow, numberRows)
           .filter(row => !row.getCell(1).value && !row.getCell(2).value && row.getCell(3).value);
 
+      let startRowDate = null;
+      let nextRowDate = null;
+
       rows.forEach(row => {
+
         row.eachCell(cell => {
           const tableCreated = moment(cell.value).subtract(10, 'days').calendar();
 
+          if (startRowDate && !nextRowDate && cell.address.startsWith('C')) {
+            nextRowDate = row.number - 1 - startRowDate;
+          }
+
           if (!cell.address.startsWith('C') || tableCreated !== date) return null;
 
-          console.log(cell)
+          startRowDate = row.number;
+
         });
       });
+
+      const importRows = worksheet.getRows(startRowDate, nextRowDate);
+      let importCounterpartyRow;
+      let importExpendableNumber;
+      let importSumRow;
+      let importDateRow;
+
+      importRows.forEach(row => {
+        row.eachCell(cell => {
+          if (cell.value === 'контрагент') {
+            importCounterpartyRow = cell;
+          }
+
+          if (cell.value === '№ расх.н.') {
+            importExpendableNumber = cell;
+          }
+
+          if (cell.value === 'Сумма') {
+            importSumRow = cell;
+          }
+
+          if (cell.value === 'дата') {
+            importDateRow = cell;
+          }
+        });
+      });
+
+      const exportWorkbook = new Excel.Workbook();
+
+      await exportWorkbook.xlsx.load(this.exportFile);
+
+      const exportWorksheet = workbook.getWorksheet('Книга облику');
+
+      const importDataRows = worksheet.getRows(startRowDate + 2, nextRowDate);
+      importDataRows.forEach((row,index) => {
+
+        if (!row.getCell(importExpendableNumber.address[0]).value) return null;
+
+        row.eachCell((cell) => {
+          if (cell.address[0] === importExpendableNumber.address[0]) {
+            console.log(cell.value, index)
+          }
+        });
+      });
+
+      // console.log(counterpartyRow, expendableNumber ,sumRow , dateRow)
     },
   },
 };
