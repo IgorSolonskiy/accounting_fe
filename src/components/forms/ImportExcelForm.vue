@@ -27,6 +27,7 @@
 import * as Excel from 'exceljs';
 import moment from 'moment';
 import axios from 'axios';
+import FileSaver from "file-saver";
 
 export default {
   data: () => ({
@@ -45,7 +46,7 @@ export default {
     ],
   }),
   async created() {
-    const url = '/ExampleBook.xlsx';
+    const url = '/textBook.xlsx';
     const {data} = await axios.get(url, {responseType: 'arraybuffer'});
 
     this.exportFile = data;
@@ -106,51 +107,67 @@ export default {
         });
       });
 
-      const importRows = worksheet.getRows(startRowDate, nextRowDate);
-      let importCounterpartyRow;
-      let importExpendableNumber;
-      let importSumRow;
-      let importDateRow;
+      const exportData = [];
 
-      importRows.forEach(row => {
-        row.eachCell(cell => {
-          if (cell.value === 'контрагент') {
-            importCounterpartyRow = cell;
+
+      const importDataRows = worksheet.getRows(startRowDate + 2, nextRowDate);
+      importDataRows.forEach((row, index) => {
+
+        if (!row.getCell("F").value || row.getCell("F").value?.startsWith("Акт" )) return null;
+
+        const updatedCell = {};
+
+        row.eachCell((cell) => {
+          if (cell.address[0] === "F") {
+            updatedCell.expendable = cell.value;
           }
 
-          if (cell.value === '№ расх.н.') {
-            importExpendableNumber = cell;
+          if (cell.address[0] === "A") {
+            updatedCell.counterparty = cell.value;
           }
 
-          if (cell.value === 'Сумма') {
-            importSumRow = cell;
+          if (cell.address[0] === "G") {
+            updatedCell.sumRow = cell.value;
           }
 
-          if (cell.value === 'дата') {
-            importDateRow = cell;
+          if (cell.address[0] === "H") {
+            updatedCell.dateRow = cell.value;
           }
+
         });
+        exportData.push(updatedCell);
       });
 
       const exportWorkbook = new Excel.Workbook();
 
       await exportWorkbook.xlsx.load(this.exportFile);
 
-      const exportWorksheet = workbook.getWorksheet('Книга облику');
+      const exportWorksheet = exportWorkbook.getWorksheet('Sheet1');
 
-      const importDataRows = worksheet.getRows(startRowDate + 2, nextRowDate);
-      importDataRows.forEach((row,index) => {
+      const exportDataRows = exportWorksheet.getRows(7, exportData.length);
+      // console.log(exportData)
+      exportDataRows.forEach((row, index) => {
+        row.getCell("A").value = 2 + index;
+        row.getCell("B").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
+        row.getCell("C").value = "Видаткова накл-на";
+        row.getCell("D").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
+        row.getCell("E").value = exportData[index].expendable;
+        row.getCell("F").value = exportData[index].counterparty;
+        row.getCell("G").value = exportData[index].sumRow.result;
+        row.getCell("H").value = ""
+        row.getCell("I").value = ""
 
-        if (!row.getCell(importExpendableNumber.address[0]).value) return null;
-
-        row.eachCell((cell) => {
-          if (cell.address[0] === importExpendableNumber.address[0]) {
-            console.log(cell.value, index)
-          }
-        });
+        row.height = exportWorksheet.getRow(5).height;
+        row.eachCell(cell=>{
+          cell.style = exportWorksheet.getRow(5).getCell(cell.address[0]).style;
+        })
       });
 
-      // console.log(counterpartyRow, expendableNumber ,sumRow , dateRow)
+      exportWorkbook.xlsx.writeBuffer().then(function (data) {
+        const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+        FileSaver.saveAs(blob, 'report.xlsx');
+      });
+
     },
   },
 };
