@@ -28,6 +28,11 @@ import * as Excel from 'exceljs';
 import moment from 'moment';
 import axios from 'axios';
 import FileSaver from "file-saver";
+import {generateDateRelativeFile} from "@/helpers/excel/generateDateRelativeFile";
+import {generateWorkbook} from "@/helpers/excel/generateWorkbook";
+import {filterByTableCreationDate} from "@/helpers/excel/filterByTableCreationDate";
+import {generateOptionsRows} from "@/helpers/excel/generateOptionsRows";
+import {generateExportData} from "@/helpers/excel/generateExportData";
 
 export default {
   data: () => ({
@@ -46,127 +51,57 @@ export default {
     ],
   }),
   async created() {
-    const url = '/textBook.xlsx';
-    const {data} = await axios.get(url, {responseType: 'arraybuffer'});
+    const {data} = await axios.get('/textBook.xlsx', {responseType: 'arraybuffer'});
 
     this.exportFile = data;
   },
   methods: {
     async changeFile(file) {
       const isValidFormat = this.$refs.form.validate();
+      const handlerSaveDates = date => this.dates.push(date);
 
       if (!isValidFormat) return null;
 
-      const workbook = new Excel.Workbook();
-      await workbook.xlsx.load(file);
-      const worksheet = workbook.getWorksheet('Расход');
-      const numberRows = worksheet.lastRow.number;
-      const firstRow = 1;
-
-      const rows = worksheet.getRows(firstRow, numberRows)
-          .filter(row => !row.getCell(1).value && !row.getCell(2).value && row.getCell(3).value);
-
-      rows.forEach(row => {
-        row.eachCell(cell => {
-          if (!cell.address.startsWith('C')) return null;
-
-          const tableCreated = moment(cell.value).subtract(10, 'days').calendar();
-
-          this.dates.push(tableCreated);
-        });
-      });
+      await generateDateRelativeFile({startAddress: "C", handlerSaveDates})
 
       this.$emit('addFile', file);
     },
     async changeDate(date) {
-      const workbook = new Excel.Workbook();
-      await workbook.xlsx.load(this.file);
-      const worksheet = workbook.getWorksheet('Расход');
-      const numberRows = worksheet.lastRow.number;
-      const firstRow = 1;
+      const {rows, worksheet} = generateWorkbook({indexOrNameSheet: "Расход"})
+      const rowsCreationDate = rows.filter(filterByTableCreationDate);
+      const {start, length} = generateOptionsRows({rows: rowsCreationDate, date});
+      const exportData = generateExportData({rows: worksheet.getRows(start, length)});
 
-      const rows = worksheet.getRows(firstRow, numberRows)
-          .filter(row => !row.getCell(1).value && !row.getCell(2).value && row.getCell(3).value);
+      //
+      // const exportWorkbook = new Excel.Workbook();
+      //
+      // await exportWorkbook.xlsx.load(this.exportFile);
+      //
+      // const exportWorksheet = exportWorkbook.getWorksheet('Sheet1');
+      //
+      // const exportDataRows = exportWorksheet.getRows(7, exportData.length);
+      // // console.log(exportData)
+      // exportDataRows.forEach((row, index) => {
+      //   row.getCell("A").value = 2 + index;
+      //   row.getCell("B").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
+      //   row.getCell("C").value = "Видаткова накл-на";
+      //   row.getCell("D").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
+      //   row.getCell("E").value = exportData[index].expendable;
+      //   row.getCell("F").value = exportData[index].counterparty;
+      //   row.getCell("G").value = exportData[index].sumRow.result;
+      //   row.getCell("H").value = ""
+      //   row.getCell("I").value = ""
+      //
+      //   row.height = exportWorksheet.getRow(5).height;
+      //   row.eachCell(cell => {
+      //     cell.style = exportWorksheet.getRow(5).getCell(cell.address[0]).style;
+      //   })
+      // });
 
-      let startRowDate = null;
-      let nextRowDate = null;
-
-      rows.forEach(row => {
-
-        row.eachCell(cell => {
-          const tableCreated = moment(cell.value).subtract(10, 'days').calendar();
-
-          if (startRowDate && !nextRowDate && cell.address.startsWith('C')) {
-            nextRowDate = row.number - 1 - startRowDate;
-          }
-
-          if (!cell.address.startsWith('C') || tableCreated !== date) return null;
-
-          startRowDate = row.number;
-
-        });
-      });
-
-      const exportData = [];
-
-
-      const importDataRows = worksheet.getRows(startRowDate + 2, nextRowDate);
-      importDataRows.forEach((row, index) => {
-
-        if (!row.getCell("F").value || row.getCell("F").value?.startsWith("Акт" )) return null;
-
-        const updatedCell = {};
-
-        row.eachCell((cell) => {
-          if (cell.address[0] === "F") {
-            updatedCell.expendable = cell.value;
-          }
-
-          if (cell.address[0] === "A") {
-            updatedCell.counterparty = cell.value;
-          }
-
-          if (cell.address[0] === "G") {
-            updatedCell.sumRow = cell.value;
-          }
-
-          if (cell.address[0] === "H") {
-            updatedCell.dateRow = cell.value;
-          }
-
-        });
-        exportData.push(updatedCell);
-      });
-
-      const exportWorkbook = new Excel.Workbook();
-
-      await exportWorkbook.xlsx.load(this.exportFile);
-
-      const exportWorksheet = exportWorkbook.getWorksheet('Sheet1');
-
-      const exportDataRows = exportWorksheet.getRows(7, exportData.length);
-      // console.log(exportData)
-      exportDataRows.forEach((row, index) => {
-        row.getCell("A").value = 2 + index;
-        row.getCell("B").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
-        row.getCell("C").value = "Видаткова накл-на";
-        row.getCell("D").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
-        row.getCell("E").value = exportData[index].expendable;
-        row.getCell("F").value = exportData[index].counterparty;
-        row.getCell("G").value = exportData[index].sumRow.result;
-        row.getCell("H").value = ""
-        row.getCell("I").value = ""
-
-        row.height = exportWorksheet.getRow(5).height;
-        row.eachCell(cell=>{
-          cell.style = exportWorksheet.getRow(5).getCell(cell.address[0]).style;
-        })
-      });
-
-      exportWorkbook.xlsx.writeBuffer().then(function (data) {
-        const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-        FileSaver.saveAs(blob, 'report.xlsx');
-      });
+      // exportWorkbook.xlsx.writeBuffer().then(function (data) {
+      //   const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      //   FileSaver.saveAs(blob, 'report.xlsx');
+      // });
 
     },
   },
