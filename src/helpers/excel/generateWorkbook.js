@@ -1,9 +1,9 @@
 import * as Excel from "exceljs";
 
-export const generateWorkbook = async ({indexOrNameSheet ='Расход'}) => {
+export const generateWorkbook = async ({indexOrNameSheet ='Расход',file}) => {
     const workbook = new Excel.Workbook();
 
-    await workbook.xlsx.load(this.file);
+    await workbook.xlsx.load(file);
 
     const worksheet = workbook.getWorksheet(indexOrNameSheet);
     const numberRows = worksheet.lastRow.number;

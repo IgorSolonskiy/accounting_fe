@@ -1,11 +1,10 @@
-import * as Excel from "exceljs";
 import moment from "moment";
 // HELPERS
 import {filterByTableCreationDate} from "@/helpers/excel/filterByTableCreationDate";
 import {generateWorkbook} from "@/helpers/excel/generateWorkbook";
 
-export const generateDateRelativeFile = async ({startAddress, handlerSaveDates}) => {
-    const {rows} = generateWorkbook({indexOrNameSheet: "Расход"})
+export const generateDateRelativeFile = async ({startAddress, handlerSaveDates, file}) => {
+    const {rows} = await generateWorkbook({indexOrNameSheet: "Расход", file})
 
     const rowsCreationDate = rows.filter(filterByTableCreationDate);
 

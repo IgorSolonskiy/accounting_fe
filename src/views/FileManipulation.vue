@@ -1,9 +1,10 @@
 <template>
   <main-layout>
-    <import-excel-form @addFile="addFile"/>
+    <import-excel-form @uploadFile="uploadFile" @datePicker="datePicker"/>
     <ExchangeIcon/>
-    <export-excel-file v-if="currentFile"/>
-    <NoItemPlaceholder v-else title="Please upload the file."/>
+    <export-excel-file v-if="currentFile && currentDate"/>
+    <NoItemPlaceholder v-else-if="!currentFile" title="Please upload the file."/>
+    <NoItemPlaceholder v-else title="Please select a date."/>
   </main-layout>
 </template>
 
@@ -19,6 +20,7 @@ export default Vue.extend({
   name: 'FileManipulation',
   data: () => ({
     currentFile: null,
+    currentDate: null,
   }),
   components: {
     MainLayout,
@@ -28,9 +30,12 @@ export default Vue.extend({
     NoItemPlaceholder
   },
   methods: {
-    addFile(file: any) {
+    uploadFile(file: any) {
       this.currentFile = file;
     },
+    datePicker(date: any) {
+      this.currentDate = date;
+    }
   }
 })
 </script>

@@ -4,6 +4,7 @@
     <v-form
         ref="form"
         v-model="valid"
+        @submit.prevent="downloadFile"
         lazy-validation
     >
       <v-text-field
@@ -17,6 +18,7 @@
           color="primary"
           elevation="4"
           height="40px"
+          type="submit"
       >
         Save file
       </v-btn>
@@ -31,6 +33,11 @@ export default {
     valid: true,
     file: 'Книга облику',
   }),
+  methods:{
+    downloadFile(){
+      console.log("submit")
+    }
+  }
 };
 </script>
 

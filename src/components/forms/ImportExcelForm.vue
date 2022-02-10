@@ -11,12 +11,12 @@
           type="file"
           v-model="file"
           :rules="fileRules"
-          @change="changeFile"
+          @change="uploadFile"
           outlined
           dense
       />
       <div>
-        <v-select @change="changeDate" :items="dates" label="Please select a book formation date."/>
+        <v-select @change="datePicker" :items="dates" label="Please select a book formation date."/>
 
       </div>
     </v-form>
@@ -33,6 +33,7 @@ import {generateWorkbook} from "@/helpers/excel/generateWorkbook";
 import {filterByTableCreationDate} from "@/helpers/excel/filterByTableCreationDate";
 import {generateOptionsRows} from "@/helpers/excel/generateOptionsRows";
 import {generateExportData} from "@/helpers/excel/generateExportData";
+import {generateRecordBook} from "@/helpers/excel/generateRecordBook";
 
 export default {
   data: () => ({
@@ -56,53 +57,26 @@ export default {
     this.exportFile = data;
   },
   methods: {
-    async changeFile(file) {
+    async uploadFile(file) {
       const isValidFormat = this.$refs.form.validate();
       const handlerSaveDates = date => this.dates.push(date);
 
       if (!isValidFormat) return null;
 
-      await generateDateRelativeFile({startAddress: "C", handlerSaveDates})
+      await generateDateRelativeFile({startAddress: "C", handlerSaveDates, file})
 
-      this.$emit('addFile', file);
+      this.$emit('uploadFile', file);
     },
-    async changeDate(date) {
-      const {rows, worksheet} = generateWorkbook({indexOrNameSheet: "Расход"})
-      const rowsCreationDate = rows.filter(filterByTableCreationDate);
-      const {start, length} = generateOptionsRows({rows: rowsCreationDate, date});
-      const exportData = generateExportData({rows: worksheet.getRows(start, length)});
+    async datePicker(date) {
+      this.$emit('datePicker', date);
 
-      //
-      // const exportWorkbook = new Excel.Workbook();
-      //
-      // await exportWorkbook.xlsx.load(this.exportFile);
-      //
-      // const exportWorksheet = exportWorkbook.getWorksheet('Sheet1');
-      //
-      // const exportDataRows = exportWorksheet.getRows(7, exportData.length);
-      // // console.log(exportData)
-      // exportDataRows.forEach((row, index) => {
-      //   row.getCell("A").value = 2 + index;
-      //   row.getCell("B").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
-      //   row.getCell("C").value = "Видаткова накл-на";
-      //   row.getCell("D").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
-      //   row.getCell("E").value = exportData[index].expendable;
-      //   row.getCell("F").value = exportData[index].counterparty;
-      //   row.getCell("G").value = exportData[index].sumRow.result;
-      //   row.getCell("H").value = ""
-      //   row.getCell("I").value = ""
-      //
-      //   row.height = exportWorksheet.getRow(5).height;
-      //   row.eachCell(cell => {
-      //     cell.style = exportWorksheet.getRow(5).getCell(cell.address[0]).style;
-      //   })
-      // });
+      // const {rows, worksheet} = await generateWorkbook({indexOrNameSheet: "Расход", file: this.file})
+      // const rowsCreationDate = rows.filter(filterByTableCreationDate);
+      // const {start, length} = generateOptionsRows({rows: rowsCreationDate, date});
+      // const exportData = generateExportData({rows: worksheet.getRows(start, length)});
+      // const blob = await generateRecordBook({exportData, file: this.exportFile});
 
-      // exportWorkbook.xlsx.writeBuffer().then(function (data) {
-      //   const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      //   FileSaver.saveAs(blob, 'report.xlsx');
-      // });
-
+      // FileSaver.saveAs(blob, 'RecordBook.xlsx');
     },
   },
 };

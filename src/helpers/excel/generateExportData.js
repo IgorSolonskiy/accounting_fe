@@ -1,29 +1,24 @@
+// HELPERS
+import {bookStructure} from "@/helpers/excel/fieldStructure";
+
 export const generateExportData = ({rows}) => {
     const exportData = [];
+    const {importStructure} = bookStructure;
 
     rows.forEach((row) => {
-
-        if (!row.getCell("F").value || row.getCell("F").value?.startsWith("Акт")) return null;
-
+        const emptyValue = !row.getCell("F").value;
+        const cellAct = String(row.getCell("F")?.value)?.startsWith("Акт");
+        const structureKeys = Object.keys(importStructure);
         const updatedCell = {};
 
+        if (emptyValue || cellAct) return null;
+
         row.eachCell((cell) => {
-            if (cell.address[0] === "F") {
-                updatedCell.expendable = cell.value;
-            }
-
-            if (cell.address[0] === "A") {
-                updatedCell.counterparty = cell.value;
-            }
-
-            if (cell.address[0] === "G") {
-                updatedCell.sumRow = cell.value;
-            }
-
-            if (cell.address[0] === "H") {
-                updatedCell.dateRow = cell.value;
-            }
-
+            structureKeys.forEach(key => {
+                if (cell.address[0] === importStructure[key]) {
+                    updatedCell[key] = cell.value
+                }
+            })
         });
         exportData.push(updatedCell);
     });
