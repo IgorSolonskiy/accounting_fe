@@ -1,7 +1,7 @@
 import * as Excel from "exceljs";
 import moment from "moment";
 
-export const generateRecordBook = async ({exportData, file, balanceDate, balanceLeft,fileName}) => {
+export const generateRecordBook = async ({exportData, file, balanceDate, balanceLeft}) => {
     const exportWorkbook = new Excel.Workbook();
 
     await exportWorkbook.xlsx.load(file);
