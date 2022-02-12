@@ -1,13 +1,24 @@
 import * as Excel from "exceljs";
 import moment from "moment";
 
-export const generateRecordBook = async ({exportData, file}) => {
+export const generateRecordBook = async ({exportData, file, balanceDate, balanceLeft,fileName}) => {
     const exportWorkbook = new Excel.Workbook();
 
     await exportWorkbook.xlsx.load(file);
 
     const exportWorksheet = exportWorkbook.getWorksheet('Книга облику');
     const exportDataRows = exportWorksheet.getRows(7, exportData.length);
+
+    //FILLING FIELD BY DEFAULT
+    exportWorksheet.getRow(5).eachCell(cell => {
+        if (cell.address.startsWith("B") || cell.address.startsWith("D")) {
+            cell.value = moment(balanceDate).format("DD.MM.YYYY");
+        }
+
+        if (cell.address.startsWith("G")) {
+            cell.value = balanceLeft;
+        }
+    })
 
     exportDataRows.forEach((row, index) => {
         row.getCell("A").value = 2 + index;
@@ -20,9 +31,11 @@ export const generateRecordBook = async ({exportData, file}) => {
         row.getCell("H").value = ""
         row.getCell("I").value = ""
 
-        row.height = exportWorksheet.getRow(5).height;
+        const defaultCell = exportWorksheet.getRow(5);
+
+        row.height = defaultCell.height;
         row.eachCell(cell => {
-            cell.style = exportWorksheet.getRow(5).getCell(cell.address[0]).style;
+            cell.style = defaultCell.getCell(cell.address[0]).style;
         })
     });
 

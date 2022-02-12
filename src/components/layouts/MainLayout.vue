@@ -2,26 +2,19 @@
   <div class="container">
     <side-nav/>
     <div class="content-wrapper">
-      <slot/>
+      <router-view/>
     </div>
   </div>
 </template>
 
 <script>
+// COMPONENTS
 import SideNav from '@/components/navigations/SideNav';
 
 export default {
-  data:()=>({
-    currentFile: null
-  }),
   components: {
     SideNav,
   },
-  methods: {
-    addFile(file){
-      this.currentFile = file;
-    },
-  }
 };
 </script>
 

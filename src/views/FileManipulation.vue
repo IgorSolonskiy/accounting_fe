@@ -1,16 +1,15 @@
 <template>
-  <main-layout>
-    <import-excel-form @uploadFile="uploadFile" @datePicker="datePicker"/>
+  <div class="file-wrapper">
+    <import-excel-form @uploadFile="uploadFile" @dataGenerationByDate="dataGenerationByDate"/>
     <ExchangeIcon/>
-    <export-excel-file v-if="currentFile && currentDate"/>
+    <export-excel-file v-if="currentFile && exportData" :exportData="exportData"/>
     <NoItemPlaceholder v-else-if="!currentFile" title="Please upload the file."/>
     <NoItemPlaceholder v-else title="Please select a date."/>
-  </main-layout>
+  </div>
 </template>
-
 <script lang="ts">
 import Vue from 'vue'
-import MainLayout from '@/components/layouts/MainLayout.vue'
+// COMPONENTS
 import ImportExcelForm from '@/components/forms/ImportExcelForm.vue';
 import ExportExcelFile from '@/components/forms/ExportExcelFile.vue';
 import ExchangeIcon from '@/components/icons/ExchangeIcon.vue';
@@ -20,10 +19,9 @@ export default Vue.extend({
   name: 'FileManipulation',
   data: () => ({
     currentFile: null,
-    currentDate: null,
+    exportData: null,
   }),
   components: {
-    MainLayout,
     ImportExcelForm,
     ExportExcelFile,
     ExchangeIcon,
@@ -33,9 +31,16 @@ export default Vue.extend({
     uploadFile(file: any) {
       this.currentFile = file;
     },
-    datePicker(date: any) {
-      this.currentDate = date;
+    dataGenerationByDate(date: any) {
+      this.exportData = date;
     }
   }
 })
 </script>
+
+<style lang="scss">
+.file-wrapper{
+  display: flex;
+  width: 100%;
+}
+</style>

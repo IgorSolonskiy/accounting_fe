@@ -16,7 +16,7 @@
           dense
       />
       <div>
-        <v-select @change="datePicker" :items="dates" label="Please select a book formation date."/>
+        <v-select @change="dataGenerationByDate" :items="dates" label="Please select a book formation date."/>
 
       </div>
     </v-form>
@@ -24,16 +24,12 @@
 </template>
 
 <script>
-import * as Excel from 'exceljs';
-import moment from 'moment';
-import axios from 'axios';
-import FileSaver from "file-saver";
+// HELPERS
 import {generateDateRelativeFile} from "@/helpers/excel/generateDateRelativeFile";
 import {generateWorkbook} from "@/helpers/excel/generateWorkbook";
 import {filterByTableCreationDate} from "@/helpers/excel/filterByTableCreationDate";
 import {generateOptionsRows} from "@/helpers/excel/generateOptionsRows";
 import {generateExportData} from "@/helpers/excel/generateExportData";
-import {generateRecordBook} from "@/helpers/excel/generateRecordBook";
 
 export default {
   data: () => ({
@@ -51,11 +47,6 @@ export default {
       },
     ],
   }),
-  async created() {
-    const {data} = await axios.get('/textBook.xlsx', {responseType: 'arraybuffer'});
-
-    this.exportFile = data;
-  },
   methods: {
     async uploadFile(file) {
       const isValidFormat = this.$refs.form.validate();
@@ -67,16 +58,13 @@ export default {
 
       this.$emit('uploadFile', file);
     },
-    async datePicker(date) {
-      this.$emit('datePicker', date);
+    async dataGenerationByDate(date) {
+      const {rows, worksheet} = await generateWorkbook({indexOrNameSheet: "Расход", file: this.file})
+      const rowsCreationDate = rows.filter(filterByTableCreationDate);
+      const {start, length} = generateOptionsRows({rows: rowsCreationDate, date});
+      const exportData = generateExportData({rows: worksheet.getRows(start, length)});
 
-      // const {rows, worksheet} = await generateWorkbook({indexOrNameSheet: "Расход", file: this.file})
-      // const rowsCreationDate = rows.filter(filterByTableCreationDate);
-      // const {start, length} = generateOptionsRows({rows: rowsCreationDate, date});
-      // const exportData = generateExportData({rows: worksheet.getRows(start, length)});
-      // const blob = await generateRecordBook({exportData, file: this.exportFile});
-
-      // FileSaver.saveAs(blob, 'RecordBook.xlsx');
+      this.$emit("dataGenerationByDate", exportData)
     },
   },
 };

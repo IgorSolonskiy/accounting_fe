@@ -6,9 +6,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
+// ICONS
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 export default Vue.extend({
   name: 'ExchangeIcon',
+  components: {
+    FontAwesomeIcon
+  }
 })
 </script>
 
