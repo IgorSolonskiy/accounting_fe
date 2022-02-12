@@ -1,9 +1,5 @@
 import Vue from 'vue'
 import VueRouter, {RouteConfig} from 'vue-router'
-// COMPONENTS
-import Dashboard from '../views/Dashboard.vue'
-import Entrepreneurs from '../views/Entrepreneurs.vue'
-import FileManipulation from '../views/FileManipulation.vue'
 
 Vue.use(VueRouter)
 
@@ -15,21 +11,25 @@ const routes: Array<RouteConfig> = [
     {
         path: '/entrepreneurs',
         name: 'Entrepreneurs',
-        component: Entrepreneurs
+        meta:{layout:"main-layout"},
+        component: () => import("../views/Entrepreneurs.vue")
     },
     {
         path: '/dashboard',
         name: 'Dashboard',
-        component: Dashboard
+        meta:{layout:"main-layout"},
+        component: () => import("../views/Dashboard.vue")
     },
     {
         path: '/manipulation',
         name: 'FileManipulation',
-        component: FileManipulation
+        meta:{layout:"main-layout"},
+        component: () => import("../views/FileManipulation.vue")
     },
 ]
 
 const router = new VueRouter({
+    mode: "history",
     routes
 })
 
