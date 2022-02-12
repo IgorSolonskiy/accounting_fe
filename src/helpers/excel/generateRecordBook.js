@@ -27,7 +27,7 @@ export const generateRecordBook = async ({exportData, file, balanceDate, balance
         row.getCell("D").value = moment(exportData[index].dateRow).format("DD.MM.YYYY");
         row.getCell("E").value = exportData[index].expendable;
         row.getCell("F").value = exportData[index].counterparty;
-        row.getCell("G").value = exportData[index].sumRow.result;
+        row.getCell("G").value = exportData[index].sumRow.result || exportData[index].sumRow;
         row.getCell("H").value = ""
         row.getCell("I").value = ""
 
