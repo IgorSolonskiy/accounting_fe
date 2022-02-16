@@ -8,7 +8,7 @@
   </v-app>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
 // COMPONENTS
 import MainLayout from "@/components/layouts/MainLayout.vue";
