@@ -3,4 +3,5 @@ module.exports = {
     'vuetify'
   ],
   publicPath:'/accounting_fe/'
+
 }
