@@ -75,7 +75,7 @@ export default {
     async downloadFile() {
       this.loading = true;
 
-      const {data: file} = await axios.get('/textBook.xlsx', {responseType: 'arraybuffer'});
+      const {data: file} = await axios.get(`${process.env.VUE_APP_BASE_URL}/textBook.xlsx`, {responseType: 'arraybuffer'});
       const blob = await generateRecordBook({
         exportData: this.exportData,
         balanceDate: this.balanceDate,
