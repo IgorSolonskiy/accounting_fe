@@ -6,31 +6,29 @@ Vue.use(VueRouter)
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        redirect: '/manipulation'
+        redirect: '/accounting_fe/manipulation'
     },
     {
-        path: '/entrepreneurs',
+        path: '/accounting_fe/entrepreneurs',
         name: 'Entrepreneurs',
         meta: {layout: "main-layout"},
         component: () => import("../views/Entrepreneurs.vue")
     },
     {
-        path: '/dashboard',
+        path: '/accounting_fe/dashboard',
         name: 'Dashboard',
         meta: {layout: "main-layout"},
         component: () => import("../views/Dashboard.vue")
     },
     {
-        path: '/manipulation',
+        path: '/accounting_fe/manipulation',
         name: 'FileManipulation',
         meta: {layout: "main-layout"},
         component: () => import("../views/FileManipulation.vue")
     },
     {
         path: '/:pathMatch(.*)*',
-        name: 'not-found',
-        meta: {layout: "main-layout"},
-        component: () => import("../views/FileManipulation.vue")
+        redirect: '/accounting_fe/manipulation'
     }
 ]
 
